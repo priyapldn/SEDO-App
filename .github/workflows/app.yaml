@@ -1,0 +1,55 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'main'
+      - 'staging'
+      - 'dev'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: pip
+
+      - name: Install python packages
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest
+
+  deploy:
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          echo "Deploying to Staging..."
+
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Deploying to Production..."
+
+      - name: Deploy to Development
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          echo "Deploying to Development..."
